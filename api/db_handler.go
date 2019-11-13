@@ -1,21 +1,22 @@
 package api
 
 import (
-	"gitlab.odds.team/plus1/backend-go/config"
 	"fmt"
+
+	"gitlab.odds.team/plus1/backend-go/config"
 	"gopkg.in/mgo.v2"
 )
 
 // MongoDB holds metadata about session database and collections name.
 type (
 	MongoDB struct {
-		Conn *mgo.Session
-		UCol *mgo.Collection
-		SCol *mgo.Collection
-		ICol *mgo.Collection
-		TCol *mgo.Collection
+		Conn   *mgo.Session
+		UCol   *mgo.Collection
+		SCol   *mgo.Collection
+		ICol   *mgo.Collection
+		TCol   *mgo.Collection
 		SumCol *mgo.Collection
-		RCol *mgo.Collection
+		RCol   *mgo.Collection
 	}
 )
 
@@ -29,12 +30,12 @@ func NewMongoDB() (*MongoDB, error) {
 	}
 
 	return &MongoDB{
-		Conn: conn,
-		UCol: conn.DB(s.DBName).C(s.DBUsersCol),
-		SCol: conn.DB(s.DBName).C(s.DBStatusCol),
-		ICol: conn.DB(s.DBName).C(s.DBItemCol),
-		TCol: conn.DB(s.DBName).C(s.DBTypeCol),
-		RCol: conn.DB(s.DBName).C(s.DBReserveCol),
+		Conn:   conn,
+		UCol:   conn.DB(s.DBName).C(s.DBUsersCol),
+		SCol:   conn.DB(s.DBName).C(s.DBStatusCol),
+		ICol:   conn.DB(s.DBName).C(s.DBItemCol),
+		TCol:   conn.DB(s.DBName).C(s.DBTypeCol),
+		RCol:   conn.DB(s.DBName).C(s.DBReserveCol),
 		SumCol: conn.DB(s.DBName).C(s.DBSummaryCol),
 	}, nil
 }

@@ -1,11 +1,12 @@
 package api
 
 import (
-	"gitlab.odds.team/plus1/backend-go/model"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"gitlab.odds.team/plus1/backend-go/model"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/labstack/echo"
