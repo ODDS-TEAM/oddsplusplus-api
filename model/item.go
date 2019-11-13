@@ -1,0 +1,24 @@
+package model
+
+import (
+	"time"
+
+	"gopkg.in/mgo.v2/bson"
+)
+
+type Item struct {
+	ItemId    bson.ObjectId `json:"_id" bson:"_id"`
+	Url       string        `json:"url" bson:"url"`
+	Title     string        `json:"title" bson:"title"`
+	Author    string        `json:"author" bson:"author"`
+	Format    string        `json:"format" bson:"format"`
+	ImgUrl    string        `json:"imgUrl" bson:"imgUrl"`
+	Price     float64       `json:"price" bson:"price"`
+	OrderDate time.Time     `json:"orderDate" bson:"orderDate"`
+	Count     int           `json:"count" bson:"count"`
+	Cost      float64       `json:"cost" bson:"cost"`
+	CreateOn  time.Time     `json:"createOn" bson:"createOn"`
+	Status    bson.ObjectId `json:"status" bson:"status"`
+	User      bson.ObjectId `json:"user" bson:"user"`
+	Type      bson.ObjectId `json:"type" bson:"type"`
+}

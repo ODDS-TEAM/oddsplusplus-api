@@ -3,9 +3,10 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"plus1/model"
 	"regexp"
 	"strings"
+
+	"gitlab.odds.team/plus1/backend-go/model"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/labstack/echo"

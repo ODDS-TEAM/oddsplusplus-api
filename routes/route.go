@@ -1,8 +1,7 @@
-package route
+package routes
 
 import (
-	"plus1/api"
-
+	"gitlab.odds.team/plus1/backend-go/api"
 	"github.com/labstack/echo"
 )
 
