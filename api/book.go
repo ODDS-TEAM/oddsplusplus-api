@@ -1,9 +1,9 @@
 package api
 
 import (
+	"gitlab.odds.team/plus1/backend-go/model"
 	"fmt"
 	"net/http"
-	"plus1/model"
 	"regexp"
 	"strings"
 
