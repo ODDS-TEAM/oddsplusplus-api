@@ -6,5 +6,5 @@ import (
 
 type Status struct {
 	StatusId	bson.ObjectId	`json:"_id," bson:"_id"`
-	Status		string 			`json:"status"`
+	Status		string 			`json:"status" bson:"status"`
 }
