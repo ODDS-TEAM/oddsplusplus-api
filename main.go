@@ -1,7 +1,8 @@
 package main
 
 import (
-	"plus1/api"
+	"plus1/config"
+	route "plus1/routes"
 
 	"github.com/labstack/echo"
 )
@@ -9,6 +10,7 @@ import (
 func main() {
 	// fmt.Println("hello")
 	e := echo.New()
-	e.POST("/book", api.GetBookDetail)
-	e.Start(":8080")
+	s := config.Spec()
+	route.Init(e)
+	e.Logger.Fatal(e.Start(s.APIPort))
 }
