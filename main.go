@@ -1,7 +1,7 @@
 package main
 
 import (
-	"plus1/controller"
+	// "plus1/controller"
 
 	"github.com/labstack/echo"
 )
@@ -9,6 +9,6 @@ import (
 func main() {
 	// fmt.Println("hello")
 	e := echo.New()
-	e.POST("/book", controller.GetBookDetail)
+	// e.POST("/book", controller.GetBookDetail)
 	e.Start(":8080")
 }
