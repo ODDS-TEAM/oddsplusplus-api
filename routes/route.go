@@ -19,4 +19,5 @@ func Init(e *echo.Echo) {
 	// }
 
 	e.POST("/book", api.GetBookDetail)
+	e.POST("/responseScrap", api.GetBookDetail)
 }
