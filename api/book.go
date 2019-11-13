@@ -1,11 +1,12 @@
 package api
 
 import (
-	"gitlab.odds.team/plus1/backend-go/model"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"gitlab.odds.team/plus1/backend-go/model"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/labstack/echo"
@@ -23,36 +24,35 @@ func GetBookDetail(e echo.Context) error {
 	doc, err := Init(url.BookUrl)
 	if err == nil {
 		cover, err := CheckCover(doc)
-		if err == nil {
-			if cover == true {
-				fmt.Println("Is Hardcover or Paperback?: ", cover)
-				imageUrl, err := GetUrlImgage(doc)
-				if err != nil {
-					return err
-				}
-				book.Imgage = imageUrl
-				bookName, err := GetBookName(doc)
-				if err != nil {
-					return err
-				}
-				book.BookName = bookName
-				book_author, err := GetBookAuthor(doc)
-				if err != nil {
-					return err
-				}
-				book.Author = book_author
-				price, err := GetPrice(doc)
-				if err != nil {
-					return err
-				}
-				book.Price = price
-			} else {
-				err := &model.FindError{
-					Message: "Please select Hardcover or Paperback",
-				}
-
-				return e.JSON(404, err)
+		if err {
+			book.Format = cover
+			fmt.Println("Is Hardcover or Paperback?: ", cover)
+			imageUrl, err := GetUrlImgage(doc)
+			if err != nil {
+				return err
 			}
+			book.Imgage = imageUrl
+			bookName, err := GetBookName(doc)
+			if err != nil {
+				return err
+			}
+			book.BookName = bookName
+			book_author, err := GetBookAuthor(doc)
+			if err != nil {
+				return err
+			}
+			book.Author = book_author
+			price, err := GetPrice(doc)
+			if err != nil {
+				return err
+			}
+			book.Price = price
+		} else {
+			err := &model.FindError{
+				Message: "Please select Hardcover or Paperback",
+			}
+
+			return e.JSON(404, err)
 		}
 
 	}
@@ -143,15 +143,16 @@ func GetBookAuthor(doc *goquery.Document) (result string, err error) {
 
 func GetPrice(doc *goquery.Document) (result string, err error) {
 	var price string
+	var temp string
 	// var isFirst bool = true
 	// fmt.Println(doc.Find(".a-color-price").
 	re := regexp.MustCompile(`[$]?\d[\d,]*[\.]?[\d]*`)
 	result, err = doc.Find("div#buybox").Html()
 	if result != "" {
-		temp := doc.Find("div#buybox").Find("span.a-color-price").Text()
+		temp = doc.Find("div#buybox").Find("span.a-color-price").Text()
 		price = re.FindString(temp)
 	} else {
-		temp := doc.Find("li.a-tab-heading.a-active.mediaTab_heading").Find("span.a-size-base.mediaTab_subtitle").Text()
+		temp = doc.Find("li.a-tab-heading.a-active.mediaTab_heading").Find("span.a-size-base.mediaTab_subtitle").Text()
 		price = re.FindString(temp)
 	}
 	// doc.Find("div#buy-box").Each(func(i int, s *goquery.Selection) {
@@ -161,30 +162,28 @@ func GetPrice(doc *goquery.Document) (result string, err error) {
 	// 		return
 	// 	}
 	// })
+	// fmt.Println(temp)
 	return price, nil
 }
 
-func CheckCover(doc *goquery.Document) (result bool, err error) {
+func CheckCover(doc *goquery.Document) (result string, err bool) {
 	var cover string
-	var sum bool
 	doc.Find("table#productDetailsTable .bucket .content ").Each(func(i int, s *goquery.Selection) {
-		s.Find("ul").Find("li").Each(func(j int, s *goquery.Selection) {
-			if strings.Contains(s.Text(), "Hardcover") || strings.Contains(s.Text(), "Paperback") {
-				cover = s.Text()
+		s.Find("b").Each(func(j int, se *goquery.Selection) {
+			fmt.Println(se.Html())
+			if strings.Contains(se.Text(), "Hardcover") || strings.Contains(se.Text(), "Paperback") {
+				cover = se.Text()
+			} else {
+				return
 			}
 		})
+		return
 	})
-
-	if strings.Contains(cover, "Paperback") || strings.Contains(cover, "Hardcover") {
-		if strings.Contains(cover, "Mass Market") {
-			sum = false
-		} else {
-			sum = true
-		}
-	} else {
-		sum = false
+	if cover != "" {
+		fmt.Println("return true")
+		return cover[:len(cover)-1], true
 	}
-	return sum, nil
+	return "", false
 }
 
 func Init(url string) (*goquery.Document, error) {
