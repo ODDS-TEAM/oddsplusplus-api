@@ -18,7 +18,7 @@ type Item struct {
 	Count     int           `json:"count" bson:"count"`
 	Cost      float64       `json:"cost" bson:"cost"`
 	CreateOn  time.Time     `json:"createOn" bson:"createOn"`
-	Status    Status        `json:"status" bson:"status"`
-	User      User          `json:"user" bson:"user"`
-	Type      Type          `json:"type" bson:"type"`
+	Status    bson.ObjectId `json:"status" bson:"status"`
+	User      bson.ObjectId `json:"user" bson:"user"`
+	Type      bson.ObjectId `json:"type" bson:"type"`
 }
