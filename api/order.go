@@ -82,7 +82,7 @@ func (db *MongoDB) AddReserve(c echo.Context) (error) {
 	}
 	temp, err := strconv.Atoi(count)
 	if err != nil {
-		fmt.Println("Error in pharse string to int ", err)
+		fmt.Println("Error in parse string to int ", err)
 		return err
 	}
 	isDefualt := &model.Reserve{}
@@ -137,7 +137,7 @@ func (db *MongoDB) Order(c echo.Context) (error) {
 	itemId := c.Param("itemId")
 	count, err := strconv.Atoi(c.Param("count"))
 	if err != nil {
-		fmt.Println("Error in pharse string to int ", err)
+		fmt.Println("Error in parse string to int ", err)
 		return err
 	}
 	item := &model.Item{}
@@ -163,18 +163,69 @@ func (db *MongoDB) Order(c echo.Context) (error) {
 		"user": user.UserId,
 		"item": item.ItemId,
 	}
-	if err := db.RCol.Find(query_reserve).One(&reserve); err == nil {
-		item.Count = item.Count + count - reserve.Count
-		if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
-			fmt.Println("Error in update item ", err)
-			return err
-		}
-		reserve.Count = count
+	if err := db.RCol.Find(query_reserve).One(&reserve); err != nil {
+		fmt.Println("Error in find reserve ", err)
+		return err
+	}
+	item.Count = item.Count + count - reserve.Count
+	if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
+		fmt.Println("Error in update item ", err)
+		return err
+	}
+	reserve.Count = count
+	if err := db.RCol.Update(bson.M{"_id": reserve.ReserveId}, &reserve); err != nil {
+		fmt.Println("Error in update reserve ", err)
+		return err
+	}
+	return c.JSON(http.StatusOK, "Oder Successed!")
+}
+
+func (db *MongoDB) UpdateOrder(c echo.Context) (error) {
+	itemId := c.Param("itemId")
+	totaoPrice, err := strconv.ParseFloat(c.Param("totalPrice"), 64)
+	if err != nil {
+		fmt.Println("Error in parsefloat ", err)
+		return err
+	}
+	charge, err := strconv.ParseFloat(c.Param("charge"), 64)
+	if err != nil {
+		fmt.Println("Error in parse float ", err)
+	}
+
+	item := &model.Item{}
+	if err := db.ICol.Find(bson.M{"_id": bson.ObjectIdHex(itemId)}).One(&item); err != nil {
+		fmt.Println("Error in find item ", err)
+		return err
+	}
+	item.Cost = totaoPrice
+	item.ShippingCharge = charge
+	status := &model.Status{}
+	if err := db.SCol.Find(bson.M{"status": "Shipping"}).One(&status); err != nil {
+		fmt.Println("Error in find status ", err)
+		return err
+	}
+	item.Status = status.StatusId
+	if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
+		fmt.Println("Error in update item ", err)
+		return err
+	}
+
+	costPerItem := totaoPrice / float64(item.Count)
+	chargePerItem := charge / float64(item.Count)
+
+	reserves := []model.Reserve{}
+	if err := db.RCol.Find(bson.M{"item": item.ItemId}).All(&reserves); err != nil {
+		fmt.Print("Error in find reserves ", err)
+		return err
+	}
+
+	for i, reserve := range reserves {
+		reserve.Cost = float64(reserve.Count) * costPerItem
+		reserve.ShippingCharge = float64(reserve.Count) * chargePerItem
 		if err := db.RCol.Update(bson.M{"_id": reserve.ReserveId}, &reserve); err != nil {
-			fmt.Println("Error in update reserve ", err)
+			fmt.Println("Error in update Reserve ", err, " index = ", i)
 			return err
 		}
 	}
-
-	return c.JSON(http.StatusOK, "Oder Successed!")
+	return c.JSON(http.StatusOK, "Update Order Successed!")
 }
