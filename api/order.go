@@ -229,3 +229,38 @@ func (db *MongoDB) UpdateOrder(c echo.Context) (error) {
 	}
 	return c.JSON(http.StatusOK, "Update Order Successed!")
 }
+
+func (db *MongoDB) DeleteOrderByUserAndItem (c echo.Context) (error) {
+	userId := c.Param("userId")
+	itemId := c.Param("itemId")
+
+	item := &model.Item{}
+	if err := db.ICol.Find(bson.M{"_id": bson.ObjectIdHex(itemId)}).One(&item); err != nil {
+		fmt.Println("Error in find item ", err)
+		return err
+	}
+
+	user := &model.User{}
+	if err := db.UCol.Find(bson.M{"_id": bson.ObjectIdHex(userId)}).One(&user); err != nil {
+		fmt.Println("Error in find user ", err)
+		return err
+	}
+
+	reserve := &model.Reserve{}
+	if err := db.RCol.Find(bson.M{"item": item.ItemId, "user": user.UserId}).One(&reserve); err != nil {
+		fmt.Println("Error in find reserve ", err)
+		return err
+	}
+	item.Count = item.Count - reserve.Count
+
+	if err := db.RCol.Remove(bson.M{"_id": reserve.ReserveId}); err != nil {
+		fmt.Println("Error to remove reserve ", err)
+		return err
+	}
+
+	if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
+		fmt.Println("Error in update item ", err)
+		return err
+	}
+	return c.JSON(http.StatusOK, "Delete Reserve Successed!")
+}
