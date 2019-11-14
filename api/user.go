@@ -1,6 +1,9 @@
 package api
 
 import (
+	"net/http"
+
+	"github.com/labstack/echo"
 	"gitlab.odds.team/plus1/backend-go/model"
 	"google.golang.org/api/oauth2/v1"
 	"gopkg.in/mgo.v2/bson"
@@ -24,4 +27,12 @@ func (db *MongoDB) FindUser(tokeninfo *oauth2.Tokeninfo) (*model.User, string) {
 	}
 
 	return u, status
+}
+
+// GetUser ...
+func (db *MongoDB) GetUser(c echo.Context) error {
+	uid := c.Param("uid")
+	data := model.User{}
+	db.UCol.FindId(bson.ObjectIdHex(uid)).One(&data)
+	return c.JSON(http.StatusOK, &data)
 }
