@@ -32,7 +32,7 @@ func Init(e *echo.Echo) {
 	e.DELETE("/items/users/:itemId/:userId", a.DeleteItem)
 
 	//Api order
-	e.GET("/reserves/users/:userID", a.GetUserReserveItem)
+	e.GET("/reserves/users/:userId", a.GetUserReserveItem)
 	e.GET("/reserves/items/:itemId", a.GetItemOrder)
 	e.GET("/reserves/users/:userId/:itemId", a.GetOrderCount)
 

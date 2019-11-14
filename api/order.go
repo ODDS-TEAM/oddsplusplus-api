@@ -10,14 +10,17 @@ import (
 )
 
 func (db *MongoDB) GetUserReserveItem(c echo.Context) error {
-	var data []model.Reserve
+	// fmt.Println("In Get reserve by userid")
+	data := []model.Reserve{}
 	userID := c.Param("userId")
 	query := bson.M{
 		"user": bson.ObjectIdHex(userID),
 	}
 	if err := db.RCol.Find(query).All(&data); err != nil {
+		fmt.Println("Error in find reserve ", err)
 		return err
 	}
+	// fmt.Println("reserve = ", data)
 	return c.JSON(http.StatusOK, data)
 }
 
@@ -271,12 +274,12 @@ func (db *MongoDB) GetSummary(c echo.Context) error {
 	var reserveData []model.Reserve
 	itemID := c.Param("itemId")
 	query := bson.M{
-		"item": bson.ObjectIdHex(itemID),
+		"_id": bson.ObjectIdHex(itemID),
 	}
 	if err := db.ICol.Find(query).One(&itemData); err != nil {
 		return err
 	}
-	if err := db.RCol.Find(query).All(&reserveData); err != nil {
+	if err := db.RCol.Find(bson.M{"item": itemData.ItemId}).All(&reserveData); err != nil {
 		return err
 	}
 	data.Item = itemData
@@ -318,7 +321,7 @@ func (db *MongoDB) DeleteReserve(c echo.Context) error {
 		fmt.Println("In update Item error ", err)
 		return err
 	}
-	if err := db.RCol.RemoveId(reserveID); err != nil {
+	if err := db.RCol.RemoveId(data.ReserveId); err != nil {
 		fmt.Println("In remove Reserve Error ", err)
 		return err
 	}
