@@ -6,6 +6,7 @@ type Book struct {
 	Author   string `json:"author"`
 	Imgage   string `json:"img"`
 	Price    string `json:"price"`
+	Format    string `json:"format" bson:"format"`
 }
 
 // BookUrl ...
