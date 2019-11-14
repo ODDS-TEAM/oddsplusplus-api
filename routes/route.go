@@ -29,4 +29,10 @@ func Init(e *echo.Echo) {
 	//Api item
 	e.GET("/items/users/:userId", a.GetUserItem)
 	e.POST("/additem", a.AddItem)
+
+	//Api order
+	e.GET("/reserves/users/:userID", a.GetUserReserveItem)
+	e.GET("/reserves/items/:itemId", a.GetItemOrder)
+	e.GET("/reserves/users/:userId/:itemId", a.GetOrderCount)
+	
 }
