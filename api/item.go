@@ -100,3 +100,31 @@ func (db *MongoDB) DeleteItem(c echo.Context) (error) {
 	}
 	return c.JSON(http.StatusOK, "Remove Item Success!")
 }
+
+func (db *MongoDB) GetItemData(c echo.Context) (error){
+	var data model.Item
+	itemId := c.Param("itemId")
+	query := bson.M{
+		"_id": bson.ObjectIdHex(itemId),
+	}
+	if err := db.ICol.Find(query).One(&data); err != nil {
+		fmt.Println("In fine Item error", err)
+		return err
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (db *MongoDB) GetAllItem(c echo.Context) (error){
+	var data []model.Item
+	var itemData []model.Item
+	if err := db.ICol.Find(bson.M{}).All(&itemData); err != nil {
+		fmt.Println("In fine All Items error", err)
+		return err
+	}
+	
+	if err := db.ICol.Pipe().All(&data); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, data)
+}
+

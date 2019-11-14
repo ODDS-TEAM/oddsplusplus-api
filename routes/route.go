@@ -30,6 +30,9 @@ func Init(e *echo.Echo) {
 	e.GET("/items/users/:userId", a.GetUserItem)
 	e.POST("/additem", a.AddItem)
 	e.DELETE("/items/users/:itemId/:userId", a.DeleteItem)
+	
+	e.GET("/items/:itemId", a.GetItemData)
+	e.GET("/items", a.GetAllItem)
 
 	//Api order
 	e.GET("/reserves/users/:userID", a.GetUserReserveItem)
@@ -43,4 +46,6 @@ func Init(e *echo.Echo) {
 	
 	e.GET("/reserves/sum/:itemId", a.GetSummary)
 	e.DELETE("reserves/:reserveId", a.DeleteReserve)
+
+	e.GET("/reserves", a.GetAllReserves)
 }
