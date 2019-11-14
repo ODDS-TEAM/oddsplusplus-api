@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/labstack/gommon/log"
-	"github.com/labstack/echo/middleware"
-	"gitlab.odds.team/plus1/backend-go/routes"
-	"gitlab.odds.team/plus1/backend-go/config"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
+	"gitlab.odds.team/plus1/backend-go/config"
+	"gitlab.odds.team/plus1/backend-go/routes"
 )
 
 func main() {
