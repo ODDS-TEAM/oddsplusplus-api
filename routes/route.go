@@ -29,4 +29,5 @@ func Init(e *echo.Echo) {
 	//Api item
 	e.GET("/items/users/:userId", a.GetUserItem)
 	e.POST("/additem", a.AddItem)
+	e.DELETE("/items/users/:itemId/:userId", a.DeleteItem)
 }

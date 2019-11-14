@@ -22,10 +22,9 @@ func (db *MongoDB) GetUserItem(c echo.Context) (error){
 }
 
 func (db *MongoDB) AddItem(c echo.Context) (error) {
-	fmt.Println("In Add Item")
 	item := &model.Item{}
 	if err := c.Bind(item); err != nil {
-		fmt.Println("In c.Bind Error")
+		fmt.Println("In c.Bind Error ", err)
 		return err
 	}
 
@@ -34,7 +33,7 @@ func (db *MongoDB) AddItem(c echo.Context) (error) {
 		"type": "Book",
 	}
 	if err := db.TCol.Find(query_type).One(&Type); err != nil {
-		fmt.Println("In Find Type Error ", Type, err)
+		fmt.Println("In Find Type Error ", err)
 		return err
 	}
 
@@ -43,18 +42,61 @@ func (db *MongoDB) AddItem(c echo.Context) (error) {
 		"status": "Pending",
 	}
 	if err := db.SCol.Find(query_status).One(&status); err != nil {
-		fmt.Println("In Status Error")
+		fmt.Println("In Status Error", err)
 		return err
 	}
-	
-	item.User = bson.ObjectId(item.User)
+	item.ItemId = bson.NewObjectId()
 	item.CreateOn = time.Now()
 	item.Status = status.StatusId
 	item.Type = Type.TypeId
 
 	if err := db.ICol.Insert(item); err != nil {
-		fmt.Println("In Insert Error")
+		fmt.Println("In Insert Error", err)
 		return err
 	}
 	return c.JSON(http.StatusOK, item)
+}
+
+func (db *MongoDB) DeleteItem(c echo.Context) (error) {
+	userId := c.Param("userId")
+	itemId := c.Param("itemId")
+
+	query_item := bson.M{
+		"_id": bson.ObjectIdHex(itemId),
+	}
+	item := &model.Item{}
+	if err := db.ICol.Find(query_item).One(&item); err != nil {
+		fmt.Println("In find Item error ", err)
+		return err
+	}
+
+	query_reserve := bson.M{
+		"item": item.ItemId,
+	}
+	reserves := []*model.Reserve{}
+	if err := db.RCol.Find(query_reserve).All(&reserves); err != nil {
+		fmt.Println("In find reserve Error ", err)
+		return err
+	}
+
+	if len(reserves) == 1 && item.User == reserves[0].User {
+		query_find_reserve := bson.M{
+			"user": bson.ObjectIdHex(userId),
+			"item": item.ItemId,
+		}
+		reserve := &model.Reserve{}
+		if err := db.RCol.Find(query_find_reserve).One(reserve); err != nil {
+			fmt.Println("In Find Reserve by user and item error ", err)
+			return err
+		}
+		if err := db.RCol.RemoveId(reserve.ReserveId); err != nil {
+			fmt.Println("In Remove Reserve Error ", err)
+			return err
+		}
+		if err := db.ICol.RemoveId(item.ItemId); err != nil {
+			fmt.Println("In Error Remove Item ", err)
+			return err
+		}
+	}
+	return c.JSON(http.StatusOK, "Remove Item Success!")
 }
