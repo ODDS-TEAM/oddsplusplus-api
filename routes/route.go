@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"gitlab.odds.team/plus1/backend-go/api"
 	"github.com/labstack/echo"
+	"gitlab.odds.team/plus1/backend-go/api"
 )
 
 // Init initialize api routes and set up a connection.
@@ -14,13 +14,13 @@ func Init(e *echo.Echo) {
 	}
 
 	a := &api.MongoDB{
-		Conn: db.Conn,
-		UCol: db.UCol,
-		ICol: db.ICol,
-		SCol: db.SCol,
+		Conn:   db.Conn,
+		UCol:   db.UCol,
+		ICol:   db.ICol,
+		SCol:   db.SCol,
 		SumCol: db.SumCol,
-		RCol: db.RCol,
-		TCol: db.TCol,
+		RCol:   db.RCol,
+		TCol:   db.TCol,
 	}
 
 	e.POST("/book", a.GetBookDetail)
@@ -40,7 +40,9 @@ func Init(e *echo.Echo) {
 	e.PATCH("/updateOrder/:itemId/:totalPrice/:charge", a.UpdateOrder)
 	e.POST("/order/:userId/:itemId/:count", a.Order)
 	e.POST("/reserves/:userId/:itemId/:count", a.AddReserve)
-	
+
 	e.GET("/reserves/sum/:itemId", a.GetSummary)
 	e.DELETE("reserves/:reserveId", a.DeleteReserve)
+	e.GET("/reserves/:itemId", a.GetItemReserve)
+	e.GET("/findTopItem/:userId", a.GetTopItem)
 }
