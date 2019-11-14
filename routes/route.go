@@ -24,6 +24,6 @@ func Init(e *echo.Echo) {
 	e.POST("/book", api.GetBookDetail)
 	e.POST("/responseScrap", api.GetBookDetail)
 	e.POST("/login", a.Login)
-	e.PATCH("/update", a.Register)
+	e.PATCH("/register", a.Register)
 	e.GET("/user/:uid", a.GetUser)
 }
