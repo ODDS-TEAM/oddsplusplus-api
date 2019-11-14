@@ -32,7 +32,7 @@ func Spec() *Specification {
 		DBUsersCol: os.Getenv("DB_USERS_COL"),
 		DBStatusCol:	os.Getenv("DB_STATUS_COL"),
 		DBItemCol: os.Getenv("DB_ITEM_COL"),
-		DBTypeCol:	os.Getenv("DB_TPYE_COL"),
+		DBTypeCol:	os.Getenv("DB_TYPE_COL"),
 		DBReserveCol: os.Getenv("DB_RESERVE_COL"),
 		DBSummaryCol: os.Getenv("DB_SUMMARY_COL"),
 		APIPort: os.Getenv("API_PORT"),

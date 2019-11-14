@@ -22,3 +22,5 @@ type Item struct {
 	User      bson.ObjectId `json:"user" bson:"user"`
 	Type      bson.ObjectId `json:"type" bson:"type"`
 }
+
+type Items []Item
