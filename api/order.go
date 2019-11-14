@@ -122,6 +122,59 @@ func (db *MongoDB) AddReserve(c echo.Context) (error) {
 			fmt.Println("Error in insert reserve ", err)
 			return err
 		}
+
+		item.Count = item.Count + temp
+		if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
+			fmt.Println("Error in update item ", err)
+			return err
+		}
 	}
-	return nil
+	return c.JSON(http.StatusOK, "Reserve Successed!")
+}
+
+func (db *MongoDB) Order(c echo.Context) (error) {
+	userId := c.Param("userId")
+	itemId := c.Param("itemId")
+	count, err := strconv.Atoi(c.Param("count"))
+	if err != nil {
+		fmt.Println("Error in pharse string to int ", err)
+		return err
+	}
+	item := &model.Item{}
+	query_item := bson.M{
+		"_id": bson.ObjectIdHex(itemId),
+	}
+	if err := db.ICol.Find(query_item).One(&item); err != nil {
+		fmt.Println("Error in find item ", err)
+		return err
+	}
+	
+	query_user := bson.M{
+		"_id": bson.ObjectIdHex(userId),
+	}
+	user := &model.User{}
+	if err := db.UCol.Find(query_user).One(&user); err != nil {
+		fmt.Println("Error in find user ", err)
+		return err
+	}
+
+	reserve := &model.Reserve{}
+	query_reserve := bson.M{
+		"user": user.UserId,
+		"item": item.ItemId,
+	}
+	if err := db.RCol.Find(query_reserve).One(&reserve); err == nil {
+		item.Count = item.Count + count - reserve.Count
+		if err := db.ICol.Update(bson.M{"_id": item.ItemId}, &item); err != nil {
+			fmt.Println("Error in update item ", err)
+			return err
+		}
+		reserve.Count = count
+		if err := db.RCol.Update(bson.M{"_id": reserve.ReserveId}, &reserve); err != nil {
+			fmt.Println("Error in update reserve ", err)
+			return err
+		}
+	}
+
+	return c.JSON(http.StatusOK, "Oder Successed!")
 }

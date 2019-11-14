@@ -36,6 +36,7 @@ func Init(e *echo.Echo) {
 	e.GET("/reserves/items/:itemId", a.GetItemOrder)
 	e.GET("/reserves/users/:userId/:itemId", a.GetOrderCount)
 
+	e.POST("/order/:userId/:itemId/:count", a.Order)
 	e.POST("/reserves/:userId/:itemId/:count", a.AddReserve)
 	
 }
