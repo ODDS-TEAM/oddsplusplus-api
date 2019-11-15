@@ -46,4 +46,9 @@ func Init(e *echo.Echo) {
 	// localhost:1323/reserves/5dccd59c78c44436a37807c9
 	e.GET("/getreserves/:itemId", a.GetItemReserve)
 	e.GET("/findTopItem/:userId", a.GetTopItem)
+
+	e.POST("/login", a.Login)
+	e.PATCH("/register", a.Register)
+	e.GET("/user/:uid", a.GetUser)
+
 }
