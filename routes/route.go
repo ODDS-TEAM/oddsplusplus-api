@@ -51,4 +51,9 @@ func Init(e *echo.Echo) {
 	e.GET("/reserves", a.GetAllReserves)
 	e.GET("/reserves/:itemId", a.GetItemReserve)
 	e.GET("/findTopItem/:userId", a.GetTopItem)
+
+	e.POST("/login", a.Login)
+	e.PATCH("/register", a.Register)
+	e.GET("/user/:uid", a.GetUser)
+
 }
