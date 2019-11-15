@@ -2,14 +2,15 @@ package api
 
 import (
 	"fmt"
-	"time"
 	"net/http"
-	"gopkg.in/mgo.v2/bson"
-	"gitlab.odds.team/plus1/backend-go/model"
+	"time"
+
 	"github.com/labstack/echo"
+	"gitlab.odds.team/plus1/backend-go/model"
+	"gopkg.in/mgo.v2/bson"
 )
 
-func (db *MongoDB) GetUserItem(c echo.Context) (error){
+func (db *MongoDB) GetUserItem(c echo.Context) error {
 	var items model.Items
 	userId := c.Param("userId")
 	query := bson.M{
@@ -21,7 +22,7 @@ func (db *MongoDB) GetUserItem(c echo.Context) (error){
 	return c.JSON(http.StatusOK, items)
 }
 
-func (db *MongoDB) AddItem(c echo.Context) (error) {
+func (db *MongoDB) AddItem(c echo.Context) error {
 	item := &model.Item{}
 	if err := c.Bind(item); err != nil {
 		fmt.Println("In c.Bind Error ", err)
@@ -57,7 +58,7 @@ func (db *MongoDB) AddItem(c echo.Context) (error) {
 	return c.JSON(http.StatusOK, item)
 }
 
-func (db *MongoDB) DeleteItem(c echo.Context) (error) {
+func (db *MongoDB) DeleteItem(c echo.Context) error {
 	userId := c.Param("userId")
 	itemId := c.Param("itemId")
 
@@ -101,7 +102,39 @@ func (db *MongoDB) DeleteItem(c echo.Context) (error) {
 	return c.JSON(http.StatusOK, "Remove Item Success!")
 }
 
-func (db *MongoDB) GetTopItem(c echo.Context) (error) {
+func (db *MongoDB) GetItemData(c echo.Context) error {
+	var data model.Item
+	itemId := c.Param("itemId")
+	query := bson.M{
+		"_id": bson.ObjectIdHex(itemId),
+	}
+	if err := db.ICol.Find(query).One(&data); err != nil {
+		fmt.Println("In fine Item error", err)
+		return err
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (db *MongoDB) GetAllItem(c echo.Context) error {
+	var data []model.Item
+	var itemData []model.Item
+	if err := db.ICol.Find(bson.M{}).All(&itemData); err != nil {
+		fmt.Println("In fine All Items error", err)
+		return err
+	}
+	sort := bson.M{
+		"$sort": bson.M{
+			"createOn": -1,
+		},
+	}
+	pipe_query := []bson.M{sort}
+	if err := db.ICol.Pipe(pipe_query).All(&data); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (db *MongoDB) GetTopItem(c echo.Context) error {
 	userId := c.Param("userId")
 	user := &model.User{}
 	if err := db.UCol.Find(bson.M{"_id": bson.ObjectIdHex(userId)}).One(&user); err != nil {
@@ -128,15 +161,13 @@ func (db *MongoDB) GetTopItem(c echo.Context) (error) {
 	return c.JSON(http.StatusOK, items)
 }
 
-
-func (db *MongoDB) GetItemReserve(c echo.Context) (error) {
+func (db *MongoDB) GetItemReserve(c echo.Context) error {
 	itemId := c.Param("itemId")
 	item := &model.Item{}
 	if err := db.ICol.Find(bson.M{"_id": bson.ObjectIdHex(itemId)}).One(&item); err != nil {
 		fmt.Println("Error in find item ", err)
 	}
 	fmt.Println("Before find reserves")
-
 	reserves := []model.Reserve{}
 	if err := db.RCol.Find(bson.M{"item": item.ItemId}).All(&reserves); err != nil {
 		fmt.Println("Error in find reserves", err)

@@ -9,6 +9,15 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func (db *MongoDB) GetAllReserves(c echo.Context) (error){
+	var data []model.Item
+	if err := db.RCol.Find(bson.M{}).All(&data); err != nil {
+		fmt.Println("In fine All Reserves error", err)
+		return err
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
 func (db *MongoDB) GetUserReserveItem(c echo.Context) error {
 	// fmt.Println("In Get reserve by userid")
 	data := []model.Reserve{}
