@@ -14,7 +14,7 @@ import (
 )
 
 // GetBookDetail ...
-func GetBookDetail(e echo.Context) error {
+func (db *MongoDB) GetBookDetail(e echo.Context) error {
 	url := &model.BookUrl{}
 	if err := e.Bind(url); err != nil {
 		return err
