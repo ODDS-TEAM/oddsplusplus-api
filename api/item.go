@@ -132,14 +132,7 @@ func (db *MongoDB) GetTopItem(c echo.Context) (error) {
 func (db *MongoDB) GetItemReserve(c echo.Context) (error) {
 	itemId := c.Param("itemId")
 	item := &model.Item{}
-	id := bson.ObjectIdHex(itemId)
-	
-	fmt.Println("Before query")
-	query_item := bson.M{
-		"_id": id,
-	}
-	fmt.Println("Before find item")
-	if err := db.ICol.Find(query_item).One(&item); err != nil {
+	if err := db.ICol.Find(bson.M{"_id": bson.ObjectIdHex(itemId)}).One(&item); err != nil {
 		fmt.Println("Error in find item ", err)
 	}
 	fmt.Println("Before find reserves")

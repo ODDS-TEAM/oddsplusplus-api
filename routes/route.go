@@ -43,6 +43,7 @@ func Init(e *echo.Echo) {
 
 	e.GET("/reserves/sum/:itemId", a.GetSummary)
 	e.DELETE("reserves/:reserveId", a.DeleteReserve)
-	e.GET("/reserves/:itemId", a.GetItemReserve)
+	// localhost:1323/reserves/5dccd59c78c44436a37807c9
+	e.GET("/getreserves/:itemId", a.GetItemReserve)
 	e.GET("/findTopItem/:userId", a.GetTopItem)
 }
