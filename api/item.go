@@ -50,11 +50,22 @@ func (db *MongoDB) AddItem(c echo.Context) error {
 	item.CreateOn = time.Now()
 	item.Status = status.StatusId
 	item.Type = Type.TypeId
-
 	if err := db.ICol.Insert(item); err != nil {
 		fmt.Println("In Insert Error", err)
 		return err
 	}
+
+	reserve := &model.Reserve{}
+	reserve.ReserveId = bson.NewObjectId()
+	reserve.Count = 1
+	reserve.Item = item.ItemId
+	reserve.User = item.User
+
+	if err := db.RCol.Insert(reserve); err != nil {
+		fmt.Println("Error in insert reserve ", err)
+		return err
+	}
+
 	return c.JSON(http.StatusOK, item)
 }
 
@@ -122,15 +133,46 @@ func (db *MongoDB) GetAllItem(c echo.Context) error {
 		fmt.Println("In fine All Items error", err)
 		return err
 	}
-	sort := bson.M{
-		"$sort": bson.M{
-			"createOn": -1,
+	// dLookup := bson.M{
+	// 	"$lookup": bson.M{
+	// 		"from":         "Status",
+	// 		"localField":   "status",
+	// 		"foreignField": "_id",
+	// 		"as":           "statusOb",
+	// 	},
+	// }
+	// dUnwind := bson.M{
+	// "$unwind": bson.M{
+	// 	"path":                       "$in_common",
+	// 	"preserveNullAndEmptyArrays": true,
+	// },
+	// }
+	// sort := bson.M{
+	// 	"$sort": bson.M{
+	// 		"createOn": -1,
+	// 	},
+	// }
+	// pipe_query := []bson.M{dLookup}
+	if err := db.ICol.Pipe([]bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         "Status",
+				"localField":   "status",
+				"foreignField": "_id",
+				"as":           "in_common",
+			},
 		},
-	}
-	pipe_query := []bson.M{sort}
-	if err := db.ICol.Pipe(pipe_query).All(&data); err != nil {
+		{
+			"$unwind": bson.M{
+				"path": "$in_common",
+				// "preserveNullAndEmptyArrays": true,
+			},
+		},
+	}).All(&data); err != nil {
+		fmt.Println("Error in find item ", err)
 		return err
 	}
+	fmt.Println(data)
 	return c.JSON(http.StatusOK, data)
 }
 
@@ -162,6 +204,7 @@ func (db *MongoDB) GetTopItem(c echo.Context) error {
 }
 
 func (db *MongoDB) GetItemReserve(c echo.Context) error {
+	fmt.Println("In Get Reserve by item Id")
 	itemId := c.Param("itemId")
 	item := &model.Item{}
 	if err := db.ICol.Find(bson.M{"_id": bson.ObjectIdHex(itemId)}).One(&item); err != nil {

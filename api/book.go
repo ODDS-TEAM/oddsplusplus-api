@@ -146,7 +146,7 @@ func GetPrice(doc *goquery.Document) (result string, err error) {
 	var temp string
 	// var isFirst bool = true
 	// fmt.Println(doc.Find(".a-color-price").
-	re := regexp.MustCompile(`[$]?\d[\d,]*[\.]?[\d]*`)
+	re := regexp.MustCompile(`\d[\d,]*[\.]?[\d]*`)
 	result, err = doc.Find("div#buybox").Html()
 	if result != "" {
 		temp = doc.Find("div#buybox").Find("span.a-color-price").Text()

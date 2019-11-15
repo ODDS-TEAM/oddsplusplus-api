@@ -54,6 +54,7 @@ func (db *MongoDB) GetOrderCount(c echo.Context) error {
 		"item": bson.ObjectIdHex(itemID),
 	}
 	if err := db.RCol.Find(query).One(&data); err != nil {
+		fmt.Println("Error in find reserve ", err)
 		return err
 	}
 	return c.JSON(http.StatusOK, data.Count)

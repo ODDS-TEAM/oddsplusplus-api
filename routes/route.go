@@ -49,7 +49,7 @@ func Init(e *echo.Echo) {
 	e.GET("/getreserves/:itemId", a.GetItemReserve)
 
 	e.GET("/reserves", a.GetAllReserves)
-	e.GET("/reserves/:itemId", a.GetItemReserve)
+	e.GET("/getreservesbyitem/:itemId", a.GetItemReserve)
 	e.GET("/findTopItem/:userId", a.GetTopItem)
 
 	e.POST("/login", a.Login)
