@@ -127,48 +127,62 @@ func (db *MongoDB) GetItemData(c echo.Context) error {
 }
 
 func (db *MongoDB) GetAllItem(c echo.Context) error {
-	var data []model.Item
+	data := []bson.M{}
 	var itemData []model.Item
 	if err := db.ICol.Find(bson.M{}).All(&itemData); err != nil {
 		fmt.Println("In fine All Items error", err)
 		return err
 	}
-	// dLookup := bson.M{
-	// 	"$lookup": bson.M{
-	// 		"from":         "Status",
-	// 		"localField":   "status",
-	// 		"foreignField": "_id",
-	// 		"as":           "statusOb",
-	// 	},
-	// }
-	// dUnwind := bson.M{
-	// "$unwind": bson.M{
-	// 	"path":                       "$in_common",
-	// 	"preserveNullAndEmptyArrays": true,
-	// },
-	// }
-	// sort := bson.M{
-	// 	"$sort": bson.M{
-	// 		"createOn": -1,
-	// 	},
-	// }
-	// pipe_query := []bson.M{dLookup}
-	if err := db.ICol.Pipe([]bson.M{
-		{
-			"$lookup": bson.M{
-				"from":         "Status",
-				"localField":   "status",
-				"foreignField": "_id",
-				"as":           "in_common",
-			},
+	SLookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Status",
+			"localField":   "status",
+			"foreignField": "_id",
+			"as":           "Status",
 		},
-		{
-			"$unwind": bson.M{
-				"path": "$in_common",
-				// "preserveNullAndEmptyArrays": true,
-			},
+	}
+	SUnwind := bson.M{
+		"$unwind": bson.M{
+			"path":                       "$Status",
+			"preserveNullAndEmptyArrays": true,
 		},
-	}).All(&data); err != nil {
+	}
+	ULookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Users",
+			"localField":   "user",
+			"foreignField": "_id",
+			"as":           "User",
+		},
+	}
+	UUnwind := bson.M{
+		"$unwind": bson.M{
+			"path":                       "$User",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+	TLookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Type",
+			"localField":   "type",
+			"foreignField": "_id",
+			"as":           "Type",
+		},
+	}
+	TUnwind := bson.M{
+		"$unwind": bson.M{
+			"path":                       "$Type",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+	sort := bson.M{
+		"$sort": bson.M{
+			"createOn": -1,
+		},
+	}
+
+	pipe_query := []bson.M{SLookup, SUnwind, ULookup, UUnwind, TLookup, TUnwind, sort}
+	if err := db.ICol.Pipe(pipe_query).All(&data); err != nil {
 		fmt.Println("Error in find item ", err)
 		return err
 	}
@@ -211,8 +225,45 @@ func (db *MongoDB) GetItemReserve(c echo.Context) error {
 		fmt.Println("Error in find item ", err)
 	}
 	fmt.Println("Before find reserves")
-	reserves := []model.Reserve{}
-	if err := db.RCol.Find(bson.M{"item": item.ItemId}).All(&reserves); err != nil {
+	reserves := []bson.M{}
+
+	ULookup := bson.M{
+		"$lookup": bson.M{
+			"from": "Users",
+			"localField": "user",
+			"foreignField": "_id",
+			"as": "User",
+		},
+	}
+	UUnwind := bson.M{
+		"$unwind": bson.M{
+			"path": "$User",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+
+	ILookup := bson.M{
+		"$lookup": bson.M{
+			"from": "Item",
+			"localField": "item",
+			"foreignField": "_id",
+			"as": "Item",
+		},
+	}
+	IUnwind := bson.M{
+		"$unwind": bson.M{
+			"path": "$Item",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+
+	MReserve := bson.M{
+		"$match": bson.M{
+			"item": bson.ObjectIdHex(itemId),
+		},
+	}
+	query := []bson.M{MReserve, ILookup, IUnwind, ULookup, UUnwind}
+	if err := db.RCol.Pipe(query).All(&reserves); err != nil {
 		fmt.Println("Error in find reserves", err)
 		return err
 	}

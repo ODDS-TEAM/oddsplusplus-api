@@ -45,7 +45,7 @@ func Init(e *echo.Echo) {
 	e.POST("/reserves/:userId/:itemId/:count", a.AddReserve)
 
 	e.GET("/reserves/sum/:itemId", a.GetSummary)
-	e.DELETE("reserves/:reserveId", a.DeleteReserve)
+	e.DELETE("deletereserves/:reserveId/:userId", a.DeleteReserve)
 	e.GET("/getreserves/:itemId", a.GetItemReserve)
 
 	e.GET("/reserves", a.GetAllReserves)
