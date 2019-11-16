@@ -1,6 +1,10 @@
 package model
 
+import (
+	"gopkg.in/mgo.v2/bson"
+)
+
 type Summary struct {
-	Item    Item      `json:"item" bson:"item"`
-	Reserve []Reserve `json:"reserve" bson:"reserve"`
+	Item    bson.ObjectId      `json:"item" bson:"item"`
+	Reserve []bson.ObjectId `json:"reserve" bson:"reserve"`
 }

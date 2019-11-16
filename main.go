@@ -38,6 +38,7 @@ func main() {
 	// e.GET("/_ah/health", func(c echo.Context) error {
 	// 	return c.String(http.StatusOK, "odds plus1 OK!")
 	// }
+	
 )
 	routes.Init(e)
 	e.Logger.Fatal(e.Start(s.APIPort))

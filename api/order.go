@@ -361,11 +361,15 @@ func (db *MongoDB) GetSummary(c echo.Context) error {
 	if err := db.ICol.Find(query).One(&itemData); err != nil {
 		return err
 	}
+
 	if err := db.RCol.Find(bson.M{"item": itemData.ItemId}).All(&reserveData); err != nil {
 		return err
 	}
-	data.Item = itemData
-	data.Reserve = reserveData
+	data.Item = itemData.ItemId
+
+	for _, reserve := range reserveData {
+		data.Reserve = append(data.Reserve, reserve.ReserveId)
+	}
 	if err := db.SumCol.Insert(data); err != nil {
 		return err
 	}
