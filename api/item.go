@@ -229,40 +229,47 @@ func (db *MongoDB) GetItemReserve(c echo.Context) error {
 
 	ULookup := bson.M{
 		"$lookup": bson.M{
-			"from": "Users",
-			"localField": "user",
+			"from":         "Users",
+			"localField":   "user",
 			"foreignField": "_id",
-			"as": "User",
+			"as":           "User",
 		},
 	}
 	UUnwind := bson.M{
 		"$unwind": bson.M{
-			"path": "$User",
+			"path":                       "$User",
 			"preserveNullAndEmptyArrays": true,
 		},
 	}
 
 	ILookup := bson.M{
 		"$lookup": bson.M{
-			"from": "Item",
-			"localField": "item",
+			"from":         "Item",
+			"localField":   "item",
 			"foreignField": "_id",
-			"as": "Item",
+			"as":           "Item",
 		},
 	}
 	IUnwind := bson.M{
 		"$unwind": bson.M{
-			"path": "$Item",
+			"path":                       "$Item",
 			"preserveNullAndEmptyArrays": true,
 		},
 	}
-
+	Slookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Status",
+			"localField":   "Item.status",
+			"foreignField": "_id",
+			"as":           "Item.Status",
+		},
+	}
 	MReserve := bson.M{
 		"$match": bson.M{
 			"item": bson.ObjectIdHex(itemId),
 		},
 	}
-	query := []bson.M{MReserve, ILookup, IUnwind, ULookup, UUnwind}
+	query := []bson.M{MReserve, ILookup, IUnwind, Slookup, ULookup, UUnwind}
 	if err := db.RCol.Pipe(query).All(&reserves); err != nil {
 		fmt.Println("Error in find reserves", err)
 		return err
