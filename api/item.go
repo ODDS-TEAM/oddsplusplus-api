@@ -276,3 +276,101 @@ func (db *MongoDB) GetItemReserve(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, reserves)
 }
+
+func (db *MongoDB) GetSummary(c echo.Context) error {
+	itemId := c.Param("itemId")
+	fmt.Println("Before find Summary", itemId)
+	Match := bson.M{
+		"$match": bson.M{
+			"item": bson.ObjectIdHex(itemId),
+		},
+	}
+	ItemLookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Item",
+			"localField":   "item",
+			"foreignField": "_id",
+			"as":           "Item",
+		},
+	}
+
+	ItemUwind := bson.M{
+		"$unwind": bson.M{
+			"path":                       "$Item",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+
+	ReserveLookup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Reserve",
+			"localField":   "reserve",
+			"foreignField": "_id",
+			"as":           "Reserve",
+		},
+	}
+
+	ReserveUnwind := bson.M{
+		"$unwind": bson.M{
+			"path":                       "$Reserve",
+			"preserveNullAndEmptyArrays": true,
+		},
+	}
+
+	UserLoopup := bson.M{
+		"$lookup": bson.M{
+			"from":         "Users",
+			"localField":   "Reserve.user",
+			"foreignField": "_id",
+			"as":           "Reserve.user",
+		},
+	}
+
+	group := bson.M{
+		"$group": bson.M{
+			"_id": "$_id",
+			"Item": bson.M{
+				"$push": "$Item",
+			},
+			"Reserve": bson.M{
+				"$push": "$Reserve",
+			},
+			// "Reserve":
+		},
+	}
+	// , {
+	// 	$group: {
+	// 	  _id : "$_id",
+	// 	  name: { $first: "$name" },
+	// 	  address: { $push: "$address" }
+	// 	}
+	//   }, {
+	// 	$project: {
+	// 	  _id: 1,
+	// 	  name: 1,
+	// 	  address: {
+	// 		$filter: { input: "$address", as: "a", cond: { $ifNull: ["$$a._id", false] } }
+	// 	  } 
+	// 	}
+	// UserUnwind := bson.M{
+	// 	"$unwind": bson.M{
+	// 		"path":                       "$User",
+	// 		"preserveNullAndEmptyArrays": true,
+	// 	},
+	// }
+
+	// group := bson.M{
+	// 	"$group": bson.M{
+	// 		"_id": bson.ObjectIdHex(itemId),
+	// 	},
+	// }
+	// , ReserveLookup, ReserveUnwind, UserLoopup, UserUnwind, group
+	query := []bson.M{Match, ItemLookup, ItemUwind, ReserveLookup, ReserveUnwind, UserLoopup, group}
+	summary := []bson.M{}
+	if err := db.SumCol.Pipe(query).All(&summary); err != nil {
+		fmt.Println("Error in find Summary ", err)
+		return err
+	} 
+
+	return c.JSON(http.StatusOK, summary)
+}

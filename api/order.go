@@ -350,7 +350,8 @@ func (db *MongoDB) DeleteOrderByUserAndItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Delete Reserve Successed!")
 }
 
-func (db *MongoDB) GetSummary(c echo.Context) error {
+func (db *MongoDB) AddSummary(c echo.Context) error {
+	fmt.Println("In add Summary")
 	var data model.Summary
 	var itemData model.Item
 	var reserveData []model.Reserve
