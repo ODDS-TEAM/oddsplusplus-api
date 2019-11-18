@@ -144,8 +144,6 @@ func GetBookAuthor(doc *goquery.Document) (result string, err error) {
 func GetPrice(doc *goquery.Document) (result string, err error) {
 	var price string
 	var temp string
-	// var isFirst bool = true
-	// fmt.Println(doc.Find(".a-color-price").
 	re := regexp.MustCompile(`\d[\d,]*[\.]?[\d]*`)
 	result, err = doc.Find("div#buybox").Html()
 	if result != "" {
@@ -155,14 +153,6 @@ func GetPrice(doc *goquery.Document) (result string, err error) {
 		temp = doc.Find("li.a-tab-heading.a-active.mediaTab_heading").Find("span.a-size-base.mediaTab_subtitle").Text()
 		price = re.FindString(temp)
 	}
-	// doc.Find("div#buy-box").Each(func(i int, s *goquery.Selection) {
-	// 	if isFirst {
-	// 		isFirst = false
-	// 		price = strings.TrimSpace(s.Text())
-	// 		return
-	// 	}
-	// })
-	// fmt.Println(temp)
 	return price, nil
 }
 
@@ -180,8 +170,11 @@ func CheckCover(doc *goquery.Document) (result string, err bool) {
 		return
 	})
 	if cover != "" {
-		fmt.Println("return true")
-		return cover[:len(cover)-1], true
+		if strings.Contains(cover, ":") {
+			return cover[:len(cover)-1], true
+		} else {
+			return cover, true
+		}
 	}
 	return "", false
 }
@@ -202,7 +195,6 @@ func Init(url string) (*goquery.Document, error) {
 	}
 
 	defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
